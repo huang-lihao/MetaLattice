@@ -1,0 +1,4 @@
+name: anaconda
+dependencies:
+  - anaconda-client
+  - conda-build

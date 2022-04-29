@@ -1,0 +1,10 @@
+{% set data = load_setup_py_data(setup_file='../setup.py', from_recipe_dir=True) %}
+package:
+  name: metalattice
+  version: {{ data.get('version').replace("v", "") }}
+
+requirements:
+  run:
+    - python
+about:
+  summary: MetaLattice is a python FEM package to model lattice metamaterials.

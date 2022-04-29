@@ -1,0 +1,103 @@
+name: Publish Github Pages
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+    - name: Build and Commit
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -U sphinx
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f requirements_doc.txt ]; then pip install -r requirements_doc.txt; fi
+
+        INPUT_REPOSITORY_PATH=.
+        INPUT_DOCUMENTATION_PATH=./docs
+        INPUT_TARGET_BRANCH=gh-pages
+        INPUT_TARGET_PATH=.
+
+        # set -x
+        set -e
+
+        repo_dir=$GITHUB_WORKSPACE/$INPUT_REPOSITORY_PATH
+        doc_dir=$repo_dir/$INPUT_DOCUMENTATION_PATH
+
+        echo ::group:: Initialize various paths
+        echo Workspace: $GITHUB_WORKSPACE
+        echo Repository: $repo_dir
+        echo Documentation: $doc_dir
+        echo ::endgroup::
+
+        echo Adding user bin to system path
+        PATH=$HOME/.local/bin:$PATH
+        if ! command -v sphinx-build &>/dev/null; then
+            echo Sphinx is not successfully installed
+            exit 1
+        else
+            echo Everything goes well
+        fi
+
+        echo ::endgroup::
+
+        echo ::group:: Creating temp directory
+        tmp_dir=$(mktemp -d -t pages-XXXXXXXXXX)
+        echo Temp directory \"$tmp_dir\" is created
+        echo ::endgroup::
+
+        echo ::group:: Running Sphinx builder
+        cd $doc_dir
+        sphinx-build -b html $doc_dir $tmp_dir
+        sphinx-build -b html $doc_dir $tmp_dir
+        sphinx-build -b html $doc_dir $tmp_dir
+        echo ::endgroup::
+
+        echo ::group:: Setting up git repository
+        echo Setting up git configure
+        cd $repo_dir
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git stash
+        echo Setting up branch $INPUT_TARGET_BRANCH
+        branch_exist=$(git ls-remote --heads origin refs/heads/$INPUT_TARGET_BRANCH)
+        if [ -z "$branch_exist" ]; then
+            echo Branch doesn\'t exist, create an empty branch
+            git checkout --force --orphan $INPUT_TARGET_BRANCH
+        else
+            echo Branch exists, checkout to it
+            git checkout --force $INPUT_TARGET_BRANCH
+        fi
+        git clean -fd
+        echo ::endgroup::
+
+        echo ::group:: Committing HTML documentation
+        cd $repo_dir
+        echo Deleting all file in repository
+        rm -vrf *
+        echo Copying HTML documentation to repository
+        # Remove unused doctree
+        rm -rf $tmp_dir/.doctrees
+        cp -vr $tmp_dir/. $INPUT_TARGET_PATH
+        echo Adding HTML documentation to repository index
+        git add $INPUT_TARGET_PATH
+        echo Recording changes to repository
+        git commit --allow-empty -m "Add changes for $GITHUB_SHA"
+        echo ::endgroup::
+    - name: Push
+      run: |
+        echo ::group:: Pushing HTML documentation
+        git remote set-url origin https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+        git push origin gh-pages
+        echo ::endgroup::
