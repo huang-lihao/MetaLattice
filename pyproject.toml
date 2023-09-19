@@ -26,6 +26,7 @@ dependencies = [
     "cython",
     "f90nml",
     "gfort2py",
+    "matplotlib",
     "meshio",
     "numpy",
     "sympy",
