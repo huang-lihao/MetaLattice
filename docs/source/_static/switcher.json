@@ -1,0 +1,12 @@
+[
+    {
+        "name": "dev",
+        "version": "latest",
+        "url": "https://metalattice.readthedocs.io/en/latest/"
+    },
+    {
+        "name": "stable",
+        "version": "stable",
+        "url": "https://metalattice.readthedocs.io/en/stable/"
+    }
+]
