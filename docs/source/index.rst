@@ -1,16 +1,17 @@
-.. MetaLattice documentation master file, created by
-   sphinx-quickstart on Tue Sep 19 10:24:33 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. _metalattice_docs_mainpage:
 
-Welcome to MetaLattice's documentation!
-=======================================
+###################################
+MetaLattice |release| documentation
+###################################
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :hidden:
 
+   User Guide <user/index>
+   API reference <reference/index>
 
+**Version**: |version|
 
 Indices and tables
 ==================

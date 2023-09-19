@@ -89,10 +89,11 @@ def linkcode_resolve(domain, info):
     if not info['module']:
         return None
     filename = info['module'].replace('.', '/')
-    return "https://github.com/huang-lihao/metalattice/%s.py" % filename
+    return "https://github.com/huang-lihao/metalattice/src/%s.py" % filename
 
 
 # Napoleon settings
+napoleon_include_init_with_doc = False
 napoleon_use_admonition_for_examples = True
 napoleon_use_ivar = True
 napoleon_preprocess_types = True
