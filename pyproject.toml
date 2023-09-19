@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "metalattice"
+authors = [
+    {name = "Huang Lihao", email = "huang-lihao@outlook.com"},
+]
+maintainers = [
+    {name = "Huang Lihao", email = "huang-lihao@outlook.com"},
+]
+description = "A Python package to model lattice metamaterials, using Abaqus."
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = ["lattice metamaterial", "micropolar", "cosserat", "abaqus"]
+license = {file = "LICENSE"}
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Fortran",
+]
+dependencies = [
+    "abaqus-mtx-parser",
+    "cython",
+    "f90nml",
+    "gfort2py",
+    "meshio",
+    "numpy",
+    "sympy",
+]
+dynamic = ["version"]
+
+
+[tool.setuptools_scm]
+write_to = "src/metalattice/_version.py"
+local_scheme = "no-local-version"
