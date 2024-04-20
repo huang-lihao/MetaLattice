@@ -17,6 +17,6 @@ This reference manual details functions, modules, and objects included in MetaLa
 
    metalattice <main_namespace>
    metalattice.abaqus <abaqus>
-   metalattice.lattice <lattice>
+   metalattice.geom <geom>
    metalattice.material <material>
 

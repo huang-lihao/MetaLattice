@@ -21,5 +21,5 @@ Submodules
     :recursive:
 
     abaqus
-    lattice
+    geom
     material

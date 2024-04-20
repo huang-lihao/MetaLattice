@@ -5,6 +5,11 @@
 
 from datetime import date
 import os
+from os.path import relpath, dirname
+import re
+from sphinx.util import inspect
+import sys
+
 import metalattice
 
 version = metalattice.__version__
@@ -21,6 +26,7 @@ author = 'Huang Lihao'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+    'numpydoc',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.linkcode',
@@ -61,6 +67,7 @@ if not version_match or version_match.isdigit() or version_match == "latest":
 
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
+html_css_files = ["metalattice.css"]
 html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.svg"
 todo_include_todos = True
@@ -83,17 +90,97 @@ html_theme_options = {
     "navigation_depth": 1,
 }
 
+# -----------------------------------------------------------------------------
+# Source code links
+# -----------------------------------------------------------------------------
+
+# Not the same as from sphinx.util import inspect and needed here
+import inspect  # noqa: E402
+
+for name in ['sphinx.ext.linkcode', 'linkcode', 'numpydoc.linkcode']:
+    try:
+        __import__(name)
+        extensions.append(name)
+        break
+    except ImportError:
+        pass
+else:
+    print("NOTE: linkcode extension not found -- no links to source generated")
+
+
 def linkcode_resolve(domain, info):
+    """
+    Determine the URL corresponding to Python object
+    """
     if domain != 'py':
         return None
-    if not info['module']:
+
+    modname = info['module']
+    fullname = info['fullname']
+
+    submod = sys.modules.get(modname)
+    if submod is None:
         return None
-    filename = info['module'].replace('.', '/')
-    return "https://github.com/huang-lihao/metalattice/src/%s.py" % filename
+
+    obj = submod
+    for part in fullname.split('.'):
+        try:
+            obj = getattr(obj, part)
+        except Exception:
+            return None
+
+    # Use the original function object if it is wrapped.
+    while hasattr(obj, "__wrapped__"):
+        obj = obj.__wrapped__
+    # # SciPy's distributions are instances of *_gen. Point to this
+    # # class since it contains the implementation of all the methods.
+    # if isinstance(obj, (rv_generic, multi_rv_generic)):
+    #     obj = obj.__class__
+    try:
+        fn = inspect.getsourcefile(obj)
+    except Exception:
+        fn = None
+    if not fn:
+        try:
+            fn = inspect.getsourcefile(sys.modules[obj.__module__])
+        except Exception:
+            fn = None
+    if not fn:
+        return None
+
+    try:
+        source, lineno = inspect.getsourcelines(obj)
+    except Exception:
+        lineno = None
+
+    if lineno:
+        linespec = "#L%d-L%d" % (lineno, lineno + len(source) - 1)
+    else:
+        linespec = ""
+
+    startdir = os.path.abspath(os.path.join(dirname(metalattice.__file__), '../..'))
+    fn = relpath(fn, start=startdir).replace(os.path.sep, '/')
+
+    if fn.startswith('src/metalattice/'):
+        m = re.match(r'^.*dev0\+([a-f0-9]+)$', metalattice.__version__)
+        base_url = "https://github.com/huang-lihao/metalattice/blob"
+        if m:
+            return f"{base_url}/{m.group(1)}/{fn}{linespec}"
+        elif 'dev' in metalattice.__version__:
+            return f"{base_url}/main/{fn}{linespec}"
+        else:
+            return f"{base_url}/v{metalattice.__version__}/{fn}{linespec}"
+    else:
+        return None
+
 
 
 # Napoleon settings
-napoleon_include_init_with_doc = False
 napoleon_use_admonition_for_examples = True
+napoleon_use_admonition_for_notes = True
+napoleon_use_admonition_for_references = True
 napoleon_use_ivar = True
+napoleon_use_param = True
+napoleon_use_keyword = True
+napoleon_use_rtype = True
 napoleon_preprocess_types = True

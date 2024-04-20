@@ -9,7 +9,8 @@ MetaLattice |release| documentation
    :hidden:
 
    User Guide <user/index>
-   API reference <reference/index>
+   API Reference <reference/index>
+   Release Notes <release/index>
 
 **Version**: |version|
 
