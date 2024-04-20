@@ -16,7 +16,7 @@ Classes
 
 class Material:
     """
-    The base material of a lattice.
+    The base material or the homogenized continuum of a lattice.
 
     A dictionary of properties is passed to the class and the properties are
     set as attributes of the class.
