@@ -161,6 +161,8 @@ def linkcode_resolve(domain, info):
     startdir = os.path.abspath(os.path.join(dirname(metalattice.__file__), '../..'))
     fn = relpath(fn, start=startdir).replace(os.path.sep, '/')
 
+    print("**********************************************************", fn, linespec)
+
     if fn.startswith('src/metalattice/'):
         m = re.match(r'^.*dev0\+([a-f0-9]+)$', metalattice.__version__)
         base_url = "https://github.com/huang-lihao/metalattice/blob"
